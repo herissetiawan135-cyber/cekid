@@ -5,8 +5,8 @@ const TelegramBot = require('node-telegram-bot-api');
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 
 // Hardcode owner & channel
-const CHANNEL_LINK = "https://t.me/dotzstorereal";
-const OWNER_LINK = "https://t.me/dotzbaik";
+const CHANNEL_LINK = "https://t.me/dotzstorereall";
+const OWNER_LINK = "https://t.me/dotzbaik80";
 
 // Foto start & card
 const START_PHOTO = "https://files.catbox.moe/obj8wm.jpg"; // ganti dengan URL gambar langsung
@@ -65,3 +65,4 @@ bot.on("new_chat_members", (msg) => {
         { parse_mode: "Markdown" }
     );
 });
+
