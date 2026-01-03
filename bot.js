@@ -4,19 +4,40 @@ const { createCanvas, loadImage } = require("canvas");
 
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 
+// ====== CONFIG ======
+const START_PHOTO = "https://files.catbox.moe/obj8wm.jpg";
+
+const OWNER_URL   = "https://t.me/dotzbaik80";
+const CHANNEL_URL = "https://t.me/dotzstorereall";
+const ALLBOT_URL  = "https://t.me/project504";
+
 // ================= START =================
-bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(
-    msg.chat.id,
+bot.onText(/\/start/, async (msg) => {
+  const chatId = msg.chat.id;
+
+  await bot.sendPhoto(
+    chatId,
+    START_PHOTO,
+    {
+      caption:
 `🪪 *CEK ID TELEGRAM*
 
 Halo *${msg.from.first_name}* 👋  
-Klik tombol di bawah untuk membuat KTP Telegram kamu.`,
-    {
+Gunakan tombol di bawah untuk melihat ID Telegram kamu
+dalam bentuk *KTP Telegram*.`,
       parse_mode: "Markdown",
       reply_markup: {
         inline_keyboard: [
-          [{ text: "🆔 Buat KTP Telegram", callback_data: "buat_ktp" }]
+          [
+            { text: "👤 Owner", url: OWNER_URL },
+            { text: "📢 Channel", url: CHANNEL_URL }
+          ],
+          [
+            { text: "🤖 All Bot", url: ALLBOT_URL }
+          ],
+          [
+            { text: "🆔 Cek ID Saya", callback_data: "buat_ktp" }
+          ]
         ]
       }
     }
@@ -33,7 +54,7 @@ bot.on("callback_query", async (q) => {
   const canvas = createCanvas(1000, 600);
   const ctx = canvas.getContext("2d");
 
-  // BACKGROUND
+  // ===== BACKGROUND =====
   const gradient = ctx.createLinearGradient(0, 0, 1000, 600);
   gradient.addColorStop(0, "#12002b");
   gradient.addColorStop(0.5, "#3b2a6f");
@@ -41,30 +62,30 @@ bot.on("callback_query", async (q) => {
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // TITLE
+  // ===== TITLE =====
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 40px Sans";
-  ctx.fillText("KARTU TANDA PENDUDUK TELEGRAM", 40, 70);
+  ctx.font = "bold 38px Sans";
+  ctx.fillText("KARTU TANDA PENDUDUK TELEGRAM", 40, 65);
 
-  // LABEL
-  ctx.font = "bold 28px Sans";
+  // ===== LABEL =====
+  ctx.font = "bold 26px Sans";
   ctx.fillStyle = "#ffd54f";
   ctx.fillText("NIK", 40, 150);
-  ctx.fillText("Name", 40, 210);
-  ctx.fillText("UserName", 40, 270);
-  ctx.fillText("Type", 40, 330);
-  ctx.fillText("DC ID", 40, 390);
+  ctx.fillText("Nama", 40, 205);
+  ctx.fillText("Username", 40, 260);
+  ctx.fillText("Tipe", 40, 315);
+  ctx.fillText("DC ID", 40, 370);
 
-  // VALUE
+  // ===== VALUE =====
   ctx.fillStyle = "#ffffff";
-  ctx.font = "28px Sans";
+  ctx.font = "26px Sans";
   ctx.fillText(`: ${user.id}`, 200, 150);
-  ctx.fillText(`: ${user.first_name}`, 200, 210);
-  ctx.fillText(`: @${user.username || "tidak ada"}`, 200, 270);
-  ctx.fillText(`: user`, 200, 330);
-  ctx.fillText(`: 5`, 200, 390);
+  ctx.fillText(`: ${user.first_name}`, 200, 205);
+  ctx.fillText(`: @${user.username || "tidak ada"}`, 200, 260);
+  ctx.fillText(`: User`, 200, 315);
+  ctx.fillText(`: 5`, 200, 370);
 
-  // FOTO PROFIL
+  // ===== FOTO PROFIL =====
   try {
     const photos = await bot.getUserProfilePhotos(user.id, { limit: 1 });
     if (photos.total_count > 0) {
@@ -74,11 +95,11 @@ bot.on("callback_query", async (q) => {
       const avatar = await loadImage(url);
 
       ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 6;
+      ctx.lineWidth = 5;
       ctx.strokeRect(720, 150, 220, 220);
       ctx.drawImage(avatar, 725, 155, 210, 210);
     }
-  } catch (e) {}
+  } catch (err) {}
 
   const buffer = canvas.toBuffer();
   await bot.sendPhoto(chatId, buffer, {
