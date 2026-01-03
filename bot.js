@@ -10,19 +10,18 @@ const START_PHOTO = "https://files.catbox.moe/obj8wm.jpg";
 
 // ================= START =================
 bot.onText(/\/start/, (msg) => {
-  bot.sendPhoto(msg.chat.id, START_PHOTO, {
-    caption:
-`🪪 *CEK ID DULU*
+  bot.sendMessage(msg.chat.id,
+`🪪 *CEK ID TELEGRAM*
 
 Halo *${msg.from.first_name}* 👋  
-Klik tombol di bawah untuk membuat kartu identitas Telegram kamu.`,
-    parse_mode: "Markdown",
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: "🆔 Buat KTP Telegram", callback_data: "buat_ktp" }]
-      ]
-    }
-  });
+Klik tombol di bawah untuk membuat KTP Telegram kamu.`,
+{
+  parse_mode: "Markdown",
+  reply_markup: {
+    inline_keyboard: [
+      [{ text: "🆔 Buat KTP Telegram", callback_data: "buat_ktp" }]
+    ]
+  }
 });
 
 // ================= CALLBACK =================
@@ -94,4 +93,5 @@ bot.on("callback_query", async (q) => {
 
   bot.answerCallbackQuery(q.id);
 });
+
 
