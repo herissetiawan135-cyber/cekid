@@ -1,107 +1,96 @@
-require('dotenv').config();
-const TelegramBot = require('node-telegram-bot-api');
-const { createCanvas, loadImage } = require('canvas');
-const fetch = require('node-fetch');
-const fs = require('fs');
+require("dotenv").config();
+const TelegramBot = require("node-telegram-bot-api");
+const { createCanvas, loadImage } = require("canvas");
+const axios = require("axios");
 
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 
-// ===== CONFIG =====
-const CHANNEL_LINK = "https://t.me/dotzstorereall";
-const OWNER_LINK   = "https://t.me/dotzbaik80";
-const START_PHOTO  = "https://files.catbox.moe/obj8wm.jpg";
+// FOTO START
+const START_PHOTO = "https://files.catbox.moe/obj8wm.jpg";
 
-// ===== START =====
+// ================= START =================
 bot.onText(/\/start/, (msg) => {
-    bot.sendPhoto(msg.chat.id, START_PHOTO, {
-        caption: `👋 Halo ${msg.from.first_name}!\nSelamat datang di bot *Cek ID Telegram*`,
-        parse_mode: "Markdown",
-        reply_markup: {
-            inline_keyboard: [
-                [
-                    { text: "📢 Channel", url: CHANNEL_LINK },
-                    { text: "👤 Owner", url: OWNER_LINK }
-                ],
-                [
-                    { text: "🆔 Cek ID Saya", callback_data: "cekid_saya" }
-                ]
-            ]
-        }
-    });
+  bot.sendPhoto(msg.chat.id, START_PHOTO, {
+    caption:
+`🪪 *KARTU TANDA PENDUDUK TELEGRAM*
+
+Halo *${msg.from.first_name}* 👋  
+Klik tombol di bawah untuk membuat kartu identitas Telegram kamu.`,
+    parse_mode: "Markdown",
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "🆔 Buat KTP Telegram", callback_data: "buat_ktp" }]
+      ]
+    }
+  });
 });
 
-// ===== CALLBACK =====
-bot.on("callback_query", async (query) => {
-    if (query.data !== "cekid_saya") return;
+// ================= CALLBACK =================
+bot.on("callback_query", async (q) => {
+  if (q.data !== "buat_ktp") return;
 
-    const chatId = query.message.chat.id;
-    const user = query.from;
+  const user = q.from;
+  const chatId = q.message.chat.id;
 
-    // ===== GET FOTO PROFIL USER =====
-    let avatarPath = null;
+  // ===== CANVAS =====
+  const canvas = createCanvas(1000, 600);
+  const ctx = canvas.getContext("2d");
 
-    try {
-        const photos = await bot.getUserProfilePhotos(user.id, { limit: 1 });
-        if (photos.total_count > 0) {
-            const fileId = photos.photos[0][0].file_id;
-            const file = await bot.getFile(fileId);
-            const url = `https://api.telegram.org/file/bot${process.env.TELEGRAM_TOKEN}/${file.file_path}`;
+  // BACKGROUND GRADIENT (SESUSAI GAMBAR KAMU)
+  const gradient = ctx.createLinearGradient(0, 0, 1000, 600);
+  gradient.addColorStop(0, "#12002b");
+  gradient.addColorStop(0.5, "#3b2a6f");
+  gradient.addColorStop(1, "#b11e5c");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const res = await fetch(url);
-            const buffer = await res.buffer();
-            avatarPath = `avatar_${user.id}.jpg`;
-            fs.writeFileSync(avatarPath, buffer);
-        }
-    } catch (e) {
-        console.log("Gagal ambil foto profil");
+  // JUDUL
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 40px Sans";
+  ctx.fillText("KARTU TANDA PENDUDUK TELEGRAM", 40, 70);
+
+  // DATA TEKS
+  ctx.font = "bold 28px Sans";
+  ctx.fillStyle = "#ffd54f";
+  ctx.fillText("NIK", 40, 150);
+  ctx.fillText("Name", 40, 210);
+  ctx.fillText("UserName", 40, 270);
+  ctx.fillText("Type", 40, 330);
+  ctx.fillText("DC ID", 40, 390);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "28px Sans";
+  ctx.fillText(`: ${user.id}`, 200, 150);
+  ctx.fillText(`: ${user.first_name}`, 200, 210);
+  ctx.fillText(`: @${user.username || "tidak ada"}`, 200, 270);
+  ctx.fillText(`: user`, 200, 330);
+  ctx.fillText(`: 5`, 200, 390);
+
+  // ===== FOTO PROFIL USER =====
+  try {
+    const photos = await bot.getUserProfilePhotos(user.id, { limit: 1 });
+    if (photos.total_count > 0) {
+      const fileId = photos.photos[0][0].file_id;
+      const file = await bot.getFile(fileId);
+      const url = `https://api.telegram.org/file/bot${process.env.TELEGRAM_TOKEN}/${file.file_path}`;
+
+      const avatar = await loadImage(url);
+
+      // FRAME FOTO
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 6;
+      ctx.strokeRect(720, 150, 220, 220);
+
+      ctx.drawImage(avatar, 725, 155, 210, 210);
     }
+  } catch (e) {}
 
-    // ===== CANVAS =====
-    const canvas = createCanvas(1000, 600);
-    const ctx = canvas.getContext('2d');
+  // KIRIM KE TELEGRAM
+  const buffer = canvas.toBuffer();
+  await bot.sendPhoto(chatId, buffer, {
+    caption: "✅ *KTP Telegram berhasil dibuat*",
+    parse_mode: "Markdown"
+  });
 
-    const bg = await loadImage('./template.png');
-    ctx.drawImage(bg, 0, 0, 1000, 600);
-
-    // ===== FOTO KANAN =====
-    if (avatarPath) {
-        const avatar = await loadImage(avatarPath);
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 6;
-        ctx.strokeRect(700, 150, 230, 230);
-        ctx.drawImage(avatar, 700, 150, 230, 230);
-        fs.unlinkSync(avatarPath);
-    }
-
-    // ===== TEXT =====
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 44px Sans";
-    ctx.fillText("KARTU TANDA PENDUDUK TELEGRAM", 40, 70);
-
-    ctx.font = "bold 30px Sans";
-    ctx.fillStyle = "#FFD700";
-    ctx.fillText("NIK", 40, 150);
-    ctx.fillText("Name", 40, 210);
-    ctx.fillText("UserName", 40, 270);
-    ctx.fillText("Type", 40, 330);
-    ctx.fillText("DC ID", 40, 390);
-
-    ctx.font = "30px Sans";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(`: ${user.id}`, 240, 150);
-    ctx.fillText(`: ${user.first_name}`, 240, 210);
-    ctx.fillText(`: @${user.username || "tidak ada"}`, 240, 270);
-    ctx.fillText(`: user`, 240, 330);
-    ctx.fillText(`: 5`, 240, 390);
-
-    // ===== SAVE & SEND =====
-    const fileName = `ktp_${user.id}.png`;
-    fs.writeFileSync(fileName, canvas.toBuffer());
-
-    await bot.sendPhoto(chatId, fileName, {
-        caption: "STORE AMAN DAN TERPERCAYA ✅"
-    });
-
-    fs.unlinkSync(fileName);
-    bot.answerCallbackQuery(query.id);
+  bot.answerCallbackQuery(q.id);
 });
