@@ -12,7 +12,7 @@ const START_PHOTO = "https://files.catbox.moe/obj8wm.jpg";
 bot.onText(/\/start/, (msg) => {
   bot.sendPhoto(msg.chat.id, START_PHOTO, {
     caption:
-`🪪 *KARTU TANDA PENDUDUK TELEGRAM*
+`🪪 *CEK ID DULU*
 
 Halo *${msg.from.first_name}* 👋  
 Klik tombol di bawah untuk membuat kartu identitas Telegram kamu.`,
@@ -94,3 +94,4 @@ bot.on("callback_query", async (q) => {
 
   bot.answerCallbackQuery(q.id);
 });
+
