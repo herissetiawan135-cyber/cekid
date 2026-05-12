@@ -5,7 +5,7 @@ const { createCanvas, loadImage } = require("canvas");
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 
 // ====== CONFIG ======
-const START_PHOTO = "https://files.catbox.moe/obj8wm.jpg";
+const START_PHOTO = "https://files.catbox.moe/jehl2n.png";
 
 const OWNER_URL   = "https://t.me/dotzbaik";
 const CHANNEL_URL = "https://t.me/dotzstorereall";
