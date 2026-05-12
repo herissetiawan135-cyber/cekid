@@ -7,9 +7,9 @@ const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 // ====== CONFIG ======
 const START_PHOTO = "https://files.catbox.moe/obj8wm.jpg";
 
-const OWNER_URL   = "https://t.me/dotzbaik80";
+const OWNER_URL   = "https://t.me/dotzbaik";
 const CHANNEL_URL = "https://t.me/dotzstorereall";
-const ALLBOT_URL  = "https://t.me/project504";
+const ALLBOT_URL  = "https://t.me/ZeusXubot";
 
 // ================= START =================
 bot.onText(/\/start/, async (msg) => {
